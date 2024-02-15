@@ -23,13 +23,15 @@ BiocManager::install("limma")
 
 ### Reading data
 # setwd("/media/sf_VMshare/BIT04-R")
+setwd("~/R_course")
+# https://vincentarelbundock.github.io/Rdatasets/csv/boot/urine.csv
 read.csv(file="Rdatasets/urine.csv", header = TRUE)
 urine_data <- read.csv(file="Rdatasets/urine.csv", header = TRUE)
 class(urine_data)
 dim(urine_data)
 colnames(urine_data)
 rownames(urine_data)
-str(urine_data)
+str(urine_data) # It would be better to change the r column to as.factor
 # Reading from url
 url <- "https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/femaleMiceWeights.csv"
 mice_data <- read.csv(url)
@@ -70,6 +72,7 @@ letters_numbers <- paste(letters,"is the",nth,"letter")
 
 ### Replace "hf" by "high fat" in the mice_dataset
 gsub("hf", "high fat", mice_data$Diet)
+# Now, assigning the replaced values to a new column
 mice_data$Diet2 <- gsub("hf", "high fat", mice_data$Diet)
 mice_data[c(1,20),]
 
