@@ -1,0 +1,7 @@
+     Diet             Bodyweight   
+ Length:24          Min.   :19.79  
+ Class :character   1st Qu.:22.36  
+ Mode  :character   Median :25.16  
+                    Mean   :25.32  
+                    3rd Qu.:28.14  
+                    Max.   :34.02  
