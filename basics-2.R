@@ -10,19 +10,19 @@ getwd()
 
 
 ### Library/packages
-install.packages("xlsx")
+# install.packages("xlsx")
 library(xlsx)
 
 
 ### Bioconductor packages
-install.packages("BiocManager")
+# install.packages("BiocManager")
 library(BiocManager)
 # e.g. Limma package for analysis of gene expression data (microarray, RNA-Seq)
 BiocManager::install("limma")
 
 
 ### Reading data
-setwd("/media/sf_VMshare/BIT04-R")
+# setwd("/media/sf_VMshare/BIT04-R")
 read.csv(file="Rdatasets/urine.csv", header = TRUE)
 urine_data <- read.csv(file="Rdatasets/urine.csv", header = TRUE)
 class(urine_data)
