@@ -16,9 +16,24 @@ nrow(subset(patients, Gender == "F"))
 ages <- sort(c(patients$Age))
 
 # How many male patients are larger than 180 cm and weigh > 100 kg?
-nrow(subset(patients, Length >= 180, Weight > 100))
+nrow(subset(patients, Length >= 180 & Weight > 100))
 
 # How many female patients have died in hospital?
-nrow(subset(patients, Gender == "F", HospitalSurvival == 0))
+nrow(subset(patients, Gender == "F" & HospitalSurvival == 0))
 
 # Change the gender (levels): F to Female and M to Male
+patients$Gender <- as.factor(gsub("F", "Female", patients$Gender))
+patients$Gender <- as.factor(gsub("M", "Male", patients$Gender))
+levels(patients$Gender)
+
+# Another way
+levels(patients$Gender) <- list(girls = "Female", boys = "Male")
+levels(patients$Gender)
+levels(patients$Gender) <- list(Female = "girls", Male = "boys")
+levels(patients$Gender)
+
+# Make a new column BMI with the body mass index (calculated)
+source("own-functions.R")
+lengths <- c(patients$Length * 0.01)
+weights <- c(patients$Weight)
+patients$BMI <- BMI(lengths, weights)

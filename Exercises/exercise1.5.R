@@ -36,11 +36,13 @@ class(ChickWeight$Day)
 # and orders them according to their final weight (lightest to heaviest) within diet.
 # Sort ChickWeight descending and look at the sorting order.
 # What are the first two and last two (different) values?
-
-
+sort(ChickWeight$Chick, decreasing = TRUE)
+unique(sort(ChickWeight$Chick, decreasing = TRUE))
 # Make a new numeric column ChickWeight$Chick2 from ChickWeight$Chick
 # and sort them descreasing. What are now the first two and last two different values?
-
+ChickWeight$Chick2 <- as.numeric(ChickWeight$Chick)
+sort(ChickWeight$Chick2, decreasing = TRUE)
+unique(sort(ChickWeight$Chick2, decreasing = TRUE))
 
 # Have a look at the first row and last row. Are the Chick and Chick values 
 # the same? Do you know why this is?
@@ -48,5 +50,15 @@ class(ChickWeight$Day)
 
 # Make four subsets of the chicks based on the same diet. 
 # Can you do this in a loop? Make a list of dataframes: listofdfs <- list()
-# and save a dataframe in the loop using: listofdfs [[dataframe]] <- subset
-diet1 <- subset(ChickWeight, Diet == 1)
+# and save a dataframe in the loop using: listofdfs[[dataframe]] <- subset
+listofdfs <- list()
+for (i in unique(ChickWeight$Diet)){
+  diet <- paste("diet", i, sep = "")
+  listofdfs[[diet]] <- subset(ChickWeight, Diet == i, c("Chick", "Diet"))
+}
+
+
+# Make a dataframe FatChicks with the chicks having weight > 300 grams
+# How many of the chicks are weighing over 300 grams?
+fatChicks <- subset(ChickWeight, weight > 300)
+nrow(fatChicks)
