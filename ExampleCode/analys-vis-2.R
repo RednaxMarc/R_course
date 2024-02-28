@@ -520,7 +520,6 @@ plot3d(iris$Petal.Length,
        size = 8)
 
 
-
 ################################################################################
 ### Parallel coordinates
 ################################################################################
@@ -540,7 +539,7 @@ legend(x = 4 + 0.1, y = 0.6, cex = 0.7,
 ## Other packages:
 # parallel() from the lattice package
 # cdparcoord package for categorical 
-#  and discrete parallel coordinates
+# and discrete parallel coordinates
 
 
 

@@ -19,8 +19,8 @@ boxplot(urine_data$calc ~ urine_data$r,
         xlab = "Precence of calcium oxidate crystals",
         ylab = "Calcium concentration mM/L",
         ylim = c(0,15),
-        main = " Boxplot calcium concentration urine datset", 
+        main = "Boxplot calcium concentration urine datset", 
         pch = "x")
 
 # Is there a difference in calcium concentration when crystals are present?
-# Yes, when there are crystals present, the calcium concentration id higher. 
+# Yes, when there are crystals present, the calcium concentration is higher. 
