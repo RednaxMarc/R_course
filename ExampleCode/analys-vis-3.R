@@ -30,6 +30,7 @@ fit
 # Plot
 x <- fit$points[,1]
 y <- fit$points[,2]
+par(mfrow=c(1,1))
 plot(x, y, 
      xlab = "Coordinate 1", 
      ylab = "Coordinate 2",
@@ -119,7 +120,7 @@ library(xlsx)
 library(Rtsne)
 library(RColorBrewer)
 ## count data of 2000 genes of 2 cell types  (c and i) of 8 patients
-setwd("/home/pacoh/Dropbox/howest/BIT07-R/Rdatasets/")
+setwd("/home/guest/R_course/Rdatasets/")
 countData <- read.csv(file="countData2000.csv", header = TRUE)
 colnames(countData)
 countData[1:2,1:6]
