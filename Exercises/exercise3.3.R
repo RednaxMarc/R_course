@@ -37,5 +37,14 @@ boxplot(patients$Weight)
 
 # Now program a loop by going over the features Length, Weight and HospitalDays 
 # and for each of these features make a histogram and boxplot
-
+par(mfrow=c(2,3))
+features <-c("Length", "Weight", "HospitalDays")
+for (i in features){
+  hist(patients[,i],
+       main=paste("Histogram and boxplot of", i))
+  
+}
+for (i in features){
+  boxplot(patients[,i])
+}
          

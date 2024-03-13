@@ -33,7 +33,7 @@ levels(patients$Gender) <- list(Female = "girls", Male = "boys")
 levels(patients$Gender)
 
 # Make a new column BMI with the body mass index (calculated)
-source("own-functions.R")
+source("./ExampleCode/own-functions.R")
 lengths <- c(patients$Length * 0.01)
 weights <- c(patients$Weight)
 patients$BMI <- BMI(lengths, weights)

@@ -12,7 +12,7 @@ str(Arabidopsis)
 # with title “Barplot variable name”,each bar in a different color  
 # (at least 9 colors i.e. max. levels) and axes set with labels and limit (ylim)
 library(RColorBrewer)
-colors <- brewer.pal(12,"Set2")
+colors <- brewer.pal(12,"Paired")
 layout(matrix(c(1,2,3,4,4,4),
               2,
               3, 
@@ -45,7 +45,7 @@ Arabidopsis$rack <- as.factor(Arabidopsis$rack)
 Arabidopsis$nutrient <- as.factor(Arabidopsis$nutrient)
 str(Arabidopsis)
 num_as_factor <-c("rack", "nutrient")
-colors <- brewer.pal(12,"Set2")
+colors <- brewer.pal(12,"Paired")
 par(mfrow = c(1,2))
 for (i in num_as_factor){
   bp <- barplot(table(Arabidopsis[,i]),
@@ -57,7 +57,7 @@ for (i in num_as_factor){
 
 # Make a new figure with boxplots of the remaining numerical values per region
 # with title, labels and colors.
-num_var <- c("gen", "total.fruits")
+# num_var <- c("gen", "total.fruits")
 par(mfrow=c(1,2))
 boxplot(Arabidopsis$gen ~ Arabidopsis$reg,
         main = "Boxplot Gentype",
@@ -69,18 +69,19 @@ boxplot(Arabidopsis$total.fruits ~ Arabidopsis$reg,
 # Also make a scatterplot of two numerical values with title, 
 # colors and legend. Each region in different color and symbol
 par(mfrow=c(1,1))
-colors <- brewer.pal(3,"Set2")
+colors <- brewer.pal(3,"Paired")
 reg_colors <- Arabidopsis$reg
 levels(reg_colors) <- list("#66C2A5" = "NL",
                            "#FC8D62" = "SP",
                            "#8DA0CB" = "SW")
-reg_col <- as.character(reg_colors)
+reg_colors <- as.character(reg_colors)
 plot(Arabidopsis$gen, Arabidopsis$total.fruits,
      xlab = "Genotype",
      ylab = "Total Fruits",
+     main = "Arabidopis genotype vs total fruits",
      pch = as.numeric(Arabidopsis$reg) -1,
      cex = 0.7,
-     col = reg_col)
+     col = reg_colors)
 
 
 

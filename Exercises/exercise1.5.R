@@ -46,7 +46,7 @@ unique(sort(ChickWeight$Chick2, decreasing = TRUE))
 
 # Have a look at the first row and last row. Are the Chick and Chick values 
 # the same? Do you know why this is?
-
+ChickWeight[c(1,nrow(ChickWeight)),]
 
 # Make four subsets of the chicks based on the same diet. 
 # Can you do this in a loop? Make a list of dataframes: listofdfs <- list()
