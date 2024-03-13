@@ -1,0 +1,115 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(RColorBrewer)
+library(ggplot2)
+library(patchwork)
+```
+
+# Car information dataset analysis. 
+The dataset contains 399 rows of 9 features, which contains some general properties 
+of cars. These 9 features are the following:
+
+1. Name: Unique identifier for each automobile.
+2. MPG: Fuel efficiency measured in miles per gallon.
+3. Cylinders: Number of cylinders in the engine.
+4. Displacement: Engine displacement, indicating its size or capacity.
+5. Horsepower: Power output of the engine.
+6. Weight: Weight of the automobile.
+7. Acceleration: Capability to increase speed, measured in seconds.
+8. Model Year: Year of manufacture for the automobile model.
+9. Origin: Country or region of origin for each automobile.
+
+The dataset can be found via this 
+[**link**](https://www.kaggle.com/datasets/tawfikelmetwally/automobile-dataset)
+
+## Data exploration
+
+```{r}
+setwd("/media/sf_SF/Fedora/R_course/Assignment")
+car_data <- read.csv("Automobile.csv")
+head(car_data)
+str(car_data)
+```
+
+```{r}
+missing_values <- is.na(car_data)
+```
+
+
+The dataset contains of 3 categorical variables (name, model_year, cylinders and origin) 
+and 6 numerical variables (mpg, cylinders, displacement, horsepower, weight 
+and acceleration). 
+IMPORTANT NOTE: The amount of cylinders also falls under categorical variable
+```{r}
+car_data$model_year <- as.character(car_data$model_year)
+car_data$model_year <- paste0("19",car_data$model_year)
+cat_var <- c("name", "model_year", "origin", "cylinders")
+num_var <- c("mpg", "displacement", "horsepower", "weight", "acceleration")
+```
+
+Let's take a look at the frequencies of each categorical variable. Because of 
+the huge amount of unique car models, no representative barplot can be generated.
+
+```{r}
+paste("Unique car models:", length(unique(car_data$name)))
+bp <- barplot(table(car_data$model_year),
+        main = "Frequency of each model year",
+        ylim = c(0,45),
+        col = brewer.pal(12, "Set1"))
+text(x=bp, y=table(car_data$model_year),label=table(car_data$model_year),pos=3)
+
+bp <- barplot(table(car_data$origin),
+        main = "Frequency of each origin",
+        ylim = c(0,max(table(car_data$origin))+50),
+        col = brewer.pal(3, "Paired"))
+ text(x=bp, y=table(car_data$origin),label=table(car_data$origin),pos=3)
+
+bp <- barplot(table(car_data$cylinders),
+        main = "Frequency of amount of cylinders",
+        ylim = c(0,max(table(car_data$cylinders)+20)),
+        col = brewer.pal(3, "Paired"))
+ text(x=bp, y=table(car_data$cylinders),label=table(car_data$cylinders),pos=3)
+```
+
+Let's take a look at the numerical variables now. 
+
+```{r}
+plot_list <- list()
+for (var in num_var) {
+  # Create boxplot
+  p <- ggplot(car_data, aes(y = !!sym(var))) +
+    geom_boxplot(fill = "skyblue", color = "black") +
+    labs(title = paste("Boxplot of", var), y = var) +
+    theme_minimal() +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          plot.title = element_text(hjust = 0.5))
+  plot_list[[var]] <- p
+}
+combined_plots <- wrap_plots(plotlist = plot_list, ncol = 3)
+print(combined_plots)
+```
+
+```{r}
+for (i in num_var){
+  boxplot(car_data[,i]~car_data$cylinders,
+          main=paste("Cylinders~",i))
+}
+```
+
+
+
+
+
+
+
+
+
