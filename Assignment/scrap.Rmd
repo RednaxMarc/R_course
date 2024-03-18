@@ -1,0 +1,19 @@
+```{r}
+plot_list <- list()
+for (i in num_var) {
+  p <- ggplot(car_data, aes(x = as.factor(origin), y = !!sym(i), fill=as.factor(origin))) +
+    geom_violin() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6, option="A") +
+    theme_ipsum() +
+    theme(
+      legend.position="none",
+      plot.title = element_text(size=11)
+    ) +
+    ggtitle("Violin chart") +
+    labs(title = paste("Origin ~", i), x = "Region")
+  plot_list[[i]] <- p
+}
+for (p in plot_list) {
+  print(p)
+}
+```
