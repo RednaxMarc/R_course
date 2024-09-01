@@ -5,6 +5,7 @@
 # 106 heterotypic (male x female different location)
 
 # Test H0: flies mate randomly (equal numbers homotypic vs heterotypic matings)
+# Performing an exact test of goodness-of-fit due to the small sample size. 
 binom.test(c(140,106), p = 0.5)
 binom.test(c(106,140), p = 0.5)
 # p-value = 0.03 -> Reject 0 hypothesis
@@ -15,7 +16,7 @@ binom.test(c(106,140), p = 0.5)
 # Of the unvaccinated children 26 were attacked by measles vs. 74 not.
 # Are the vaccination and attack rates independent (H0)?
 # Or does the vaccination protects (Ha not independent)?
-
+# Two nominal variables here, no measurements => Fisher exact test
 attacked <- c(26,10)
 nonattacked <- c(74,90)
 outcome <- data.frame(attacked, 
@@ -32,6 +33,7 @@ fisher.test(outcome)
 
 # H0: at each area there is no difference in proportion of Lap94 alleles
 # between marine and estuarine habitats. Reject H0 or not?
+#Cochran-Mantel-Haenszel test => Three nominal variables, no measurements, only frequencies. 
 # make the array
 mussel <- array(c(56,40,69,77,
                 61,57,257,301,
@@ -50,7 +52,9 @@ mantelhaen.test(mussel)
 # Use corn-dataset.csv in Rdatasets
 # Make a boxplot of the yield for each manure x fertilizer group
 # Test the effect of manure, fertilizer and if there is an interaction between them
-corn <- read_csv("./Rdatasets/corn-dataset.csv")
+# Will use a two way anova here => Two nominal, 1 measurement, 
+# multiple repepetitions of combinations
+corn <- read.csv("./Rdatasets/corn-dataset.csv")
 boxplot(data = corn, Yield ~ Fert*Manure,
         ylab = "Fert x Manure")
 corn.model = lm(data = corn, Yield ~ Fert*Manure)

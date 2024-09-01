@@ -58,8 +58,8 @@ plot(iris.lm)
 ################################################################################
 ### Ancova: Analysis of covariance
 ################################################################################
-setwd("/media/sf_VMshare/BIT04-R/Rdatasets/")
-crickets <- read.csv("crickets-dataset.csv", 
+# setwd("/media/sf_VMshare/BIT04-R/Rdatasets/")
+crickets <- read.csv("./Rdatasets/crickets-dataset.csv", 
                      sep = ",", header = TRUE)
 str(crickets)
 # Set species colors
@@ -93,7 +93,7 @@ mean(crickets[crickets$Species=="Oniv","PulsesPerSec"])  # 62.43
 # Higher rate might be at certain temp
 # Control for temp with ancova
 
-## Analysis of covariance (ancova)
+## Analysis of covariance (ancova) => compare two or more regression lines
 ## Model 1 (with interaction with covariate)
 crickets.m1 <- aov(PulsesPerSec ~ Temp + Species + Temp:Species,
                    data = crickets)
@@ -139,9 +139,8 @@ abline(I2, B, col = "red")
 ################################################################################
 ### Spearman rank correlation
 ################################################################################
-setwd("/media/sf_VMshare/BIT04-R/Rdatasets/")
 ## Monkeys & nematodes eggs dataset in Rdatasets3
-monkeys <- read.csv("monkey-nematode-dataset.csv", 
+monkeys <- read.csv("./Rdatasets/monkey-nematode-dataset.csv", 
                     sep = ",", header = TRUE)
 library(Hmisc)
 rcorr(monkeys$DominanceRank, 
@@ -163,8 +162,7 @@ abline(0, 1, col="gray80", lty = 3)
 ################################################################################
 ### Multiple regression
 ################################################################################
-setwd("/media/sf_VMshare/BIT04-R/Rdatasets/")
-fish <- read.csv("fish-dataset.csv", 
+fish <- read.csv("./Rdatasets/fish-dataset.csv", 
                  sep = ",", header = TRUE)
 str(fish)
 # only use numeric data or you will get error
@@ -221,8 +219,7 @@ model.final$coefficients # OR coefficients(model.final)
 ################################################################################
 ### Simple logistic regression
 ################################################################################
-setwd("/media/sf_VMshare/BIT04-R/Rdatasets/")
-amphipod <- read.csv("amphipod-slogreg.csv", 
+amphipod <- read.csv("./Rdatasets/amphipod-slogreg.csv", 
                       sep = ",", header = TRUE)
 # nominal (dependent): Mpi90 and Mpi100 (alleles amphipods)
 # measurement: latitude

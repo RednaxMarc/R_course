@@ -18,7 +18,7 @@ library(xlsx)
 # install.packages("BiocManager")
 library(BiocManager)
 # e.g. Limma package for analysis of gene expression data (microarray, RNA-Seq)
-BiocManager::install("limma")
+# BiocManager::install("limma")
 
 
 ### Reading data

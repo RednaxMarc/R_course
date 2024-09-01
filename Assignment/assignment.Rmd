@@ -7,15 +7,17 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(RColorBrewer)
-library(ggplot2)
 library(ggExtra)
+library(ggplot2)
 library(ggthemes)
+library(gridExtra)
+library(hrbrthemes)
 library(patchwork)
+library(PerformanceAnalytics)
 library(tidyverse)
 library(vioplot)
-library(hrbrthemes)
 ```
 
 # Car information dataset analysis. 
@@ -36,30 +38,27 @@ The dataset can be found via this
 [**link**](https://www.kaggle.com/datasets/tawfikelmetwally/automobile-dataset)
 
 ## Data exploration
-
+In the output below, the first 5 lines of the data can be seen, and the overall structure. 
 ```{r}
-setwd("/media/sf_SF/Fedora/R_course/Assignment/")
+# setwd("/media/sf_SF/Fedora/R_course/Assignment/")
 car_data <- read.csv("Automobile.csv")
 head(car_data)
 str(car_data)
 ```
 
-Let's check if there are empty values 
+Let's check if there are empty values, while omitting these directly. 
 ```{r}
 missing_values <- which(is.na(car_data), arr.ind = TRUE)
 print(missing_values)
 print(paste("Column 5 is",colnames(car_data)[5]))
+car_data <- na.omit(car_data)
 ```
-There are six missing values in the horsepower column.
 
-The dataset contains of 3 categorical variables (name, model_year, cylinders and origin) 
-and 6 numerical variables (mpg, cylinders, displacement, horsepower, weight 
-and acceleration). 
+There are six missing values in the "horsepower" column.
 
-IMPORTANT NOTE: The amount of cylinders also falls under categorical variable, as
-it devides the cars in categorical groups based on their engine. Also, the miles
-per gallon will be ignored, because the mpg values will be calcated to liters/100k,
-which will be placed inside a new column
+The dataset contains four categorical variables (name, model_year, cylinders, and origin) and six numerical variables (mpg, displacement, horsepower, weight, and acceleration).
+
+IMPORTANT NOTE: The number of cylinders falls under categorical variables, as it divides the cars into categorical groups based on their engine. Additionally, the miles per gallon will be disregarded, as the mpg values will be converted into liters per 100 kilometers (L/100km) and placed within a new column.
 
 ```{r}
 car_data$model_year <- as.character(car_data$model_year)
@@ -79,96 +78,185 @@ car_data$brand <- sapply(strsplit(car_data$name, " "), `[`, 1)
 
 paste0("Unique car models: ",length(unique(car_data$name)),', Unique car brands: ', length(unique(car_data$brand)))
 ```
-
 ```{r, warning=FALSE}
+par(mfrow = c(1,2))
+bp <- barplot(table(car_data$origin),
+        main = "Frequency of each origin",
+        ylim = c(0,max(table(car_data$origin))+50),
+        col = brewer.pal(3, "Paired"))
+text(x=bp, y=table(car_data$origin),label=table(car_data$origin),pos=3)
+bp <- barplot(table(car_data$cylinders),
+        main = "Frequency of numb of cylinders",
+        xlab = "Amount of cylinders",
+        ylim = c(0,max(table(car_data$cylinders)+20)),
+        col = brewer.pal(3, "Paired"))
+text(x=bp, y=table(car_data$cylinders),label=table(car_data$cylinders),pos=3)
+par(mfrow = c(1,1))
 bp <- barplot(table(car_data$model_year),
         main = "Frequency of each model year",
         ylim = c(0,45),
         col = brewer.pal(12, "Set1"),
         las = 2)
 text(x=bp, y=table(car_data$model_year),label=table(car_data$model_year),pos=3)
-
-bp <- barplot(table(car_data$origin),
-        main = "Frequency of each origin",
-        ylim = c(0,max(table(car_data$origin))+50),
-        col = brewer.pal(3, "Paired"))
-text(x=bp, y=table(car_data$origin),label=table(car_data$origin),pos=3)
-
-bp <- barplot(table(car_data$cylinders),
-        main = "Frequency of amount of cylinders",
-        xlab = "Amount of cylinders",
-        ylim = c(0,max(table(car_data$cylinders)+20)),
-        col = brewer.pal(3, "Paired"))
-text(x=bp, y=table(car_data$cylinders),label=table(car_data$cylinders),pos=3)
 ```
 
-The plots above show that the model years are fairly normaliy distributed. On the other hand, the origin and amount of cylinders of the cars are not equally distributed. 
+The plots above show that the model years are fairly normaly distributed. But on the other hand, the origin and amount of cylinders of the cars are not equally distributed. 
+Let's take a look at the density and distributions of the numerical variables now. 
 
-Let's take a look at density and distribution of the numerical variables now. 
-```{r, warning=FALSE}
+```{r, warning=FALSE, fig.width=8.27, fig.height=11.69}
+plot_list <- list() # Making a list to arrange the plots nicely later
 for (var in num_var) {
   p <- ggplot(car_data, aes(x = !!sym(var))) +
     geom_density(fill = "skyblue", color = "black") +
     labs(title = paste("Densityplot of", var)) +
     theme_minimal() +
     theme(plot.title = element_text(hjust = 0.5))
-  print(p)
+  plot_list[[length(plot_list) + 1]] <- p
 }
+grid.arrange(grobs = plot_list, ncol = 2, nrow = 3) # arranging the plots in one figure
 ```
-The acceleration variable has a normal distribution. The other numerical variables have a right skewness
 
+The acceleration variable has a normal distribution. The 4 other numerical variables all have a right skewness.
+
+## Question 1
 With this dataset, some genereal research questions can be asked. Firstly, do the amount of cylinders have a correlation with the numerical variables? To start, let's make some boxplots of the numerical variables, grouped by the amount of cylinders of the engine.  
-```{r, warning=FALSE}
+
+```{r, fig.width=8.27, fig.height=5.5}
 for (i in num_var) {
+  # Making a table with the frequencies of each number of cylinders
   measurements <- car_data %>%
   group_by(cylinders) %>%
   summarise(count = sum(!is.na(!!sym(i))))
   
   p <- ggplot(car_data, aes(x = as.factor(cylinders), y = !!sym(i))) +
     geom_boxplot(fill = "skyblue", color = "black") +
-    geom_text(data = measurements,aes(label = paste(count, "Measurements"),
-                  y = max(car_data[[i]], na.rm = TRUE)), 
+    # Adding the frequency for the amount of cylinders
+    geom_text(data = measurements, aes(label = paste(count, "Measurements"), 
+                                       x = as.factor(cylinders), 
+                                       y = max(car_data[[i]], na.rm = TRUE)),
               vjust = -1, size = 3) +
     labs(title = paste("Cylinders ~", i), x = "Amount of cylinders") +
     theme_minimal() + 
      theme(plot.title = element_text(hjust = 0.5))
+  plot_list[[length(plot_list) + 1]] <- p
   print(p)
 }
 ```
-As the plots above depict, the median of fuel consumption, displacement, horsepower and weight go rises with the amount of cylinders. How about their distribution grouped by 
 
-```{r, warning=FALSE}
+As the plots above depict, the median of fuel consumption (excluding the three cylinders), displacement, horsepower and weight increase with the number of cylinders for all variables, except for the acceleration of the cars. 
+
+Now, what about the density of each variable plotted over each other? Can we see the same pattern as clearly here?
+
+```{r, warning=FALSE, fig.width=8.27, fig.height=5.5}
 for (i in num_var){
   p <- ggplot(data = car_data, aes(x = car_data[,i], fill = as.factor(cylinders))) +
     geom_density(alpha = 0.7) +
-    labs(title = paste("Density of",i,"grouped by cylinders"), x = i) +
+    labs(title = paste("Density of",i,"grouped by cylinders"), 
+         x = i,
+         fill = "Cylinders") +
     theme_base() +
+    theme(plot.title = element_text(hjust = 0.5)) +
     theme(legend.position = "top")
   print(p)
 }
 ```
-Let's make a scatterplot to further investigate the correlatations.
+
+Here again, we observe a similar trend, with the exception of the acceleration variable. The density plots shift to the right as the number of cylinders increases. However, not every density plot is visually pleasing due to the limited sample size for 3 and 5 cylinders. 
+Next, let's further investigate some correlatations, but now via a correlationplot of the numerical variables only.
+
 ```{r, warning=FALSE}
-for (i in 1:length(num_var)) {
-  for (j in (i + 1):length(num_var)) {  # Start from i + 1 to avoid duplicates
-    if (i != j && !is.na(num_var[i]) && !is.na(num_var[j])) {     
-      p <- ggplot(car_data, aes_string(x = num_var[i], 
-                                       y = num_var[j], 
-                                       color = "cylinders")) +
-        geom_point() +
-        geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE) + 
-        theme(legend.position = "right") +  
-        labs(color = "Cylinders") 
-      
-      p2 <- ggMarginal(p, type = "densigram") +
-      print(p2)
-    }
-  }
-}
+chart.Correlation(car_data[num_var], 
+                  method = "pearson",
+                  histogram = TRUE, 
+                  pch = 16)
 ```
 
-A second research question that can be asked, is if there any difference in the numerical variables between the origins of the cars? To check this, a violin plot was made. 
-```{r}
+The correlation plot provides a comprehensive overview of the numerical variables that are strongly related through scatterplots, densigrams, and correlation coefficients. Now, let's narrow down our focus to the numerical variables that have an absolute correlation coefficient greater than 0.80.
+
+```{r, message=FALSE, warning=FALSE, fig.width=8.27, fig.height=5.5}
+# Note that the code for only one plot is shown. 
+p <- ggplot(car_data ,aes_string(x = "L_100km", 
+                                 y = "displacement", 
+                                 color = "cylinders")) +
+  geom_point() +
+  geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE) + 
+  theme(legend.position = "right") +  
+  labs(color = "Cylinders") 
+      
+p2 <- ggMarginal(p, type = "densigram")
+print(p2)
+```
+```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.width=8.27, fig.height=5.5}
+p <- ggplot(car_data, aes_string(x = "L_100km", 
+                                 y = "horsepower", 
+                                 color = "cylinders")) +
+  geom_point() +
+  geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE) + 
+  theme(legend.position = "right") +  
+  labs(color = "Cylinders") 
+      
+p2 <- ggMarginal(p, type = "densigram")
+print(p2)
+```
+```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.width=8.27, fig.height=5.5}
+p <- ggplot(car_data ,aes_string(x = "L_100km", 
+                                 y = "weight", 
+                                 color = "cylinders")) +
+  geom_point() +
+  geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE) + 
+  theme(legend.position = "right") +  
+  labs(color = "Cylinders") 
+      
+p2 <- ggMarginal(p, type = "densigram")
+print(p2)
+```
+```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.width=8.27, fig.height=5.5}
+p <- ggplot(car_data ,aes_string(x = "displacement", 
+                                 y = "horsepower", 
+                                 color = "cylinders")) +
+  geom_point() +
+  geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE) + 
+  theme(legend.position = "right") +  
+  labs(color = "Cylinders") 
+      
+p2 <- ggMarginal(p, type = "densigram")
+print(p2)
+```
+```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.width=8.27, fig.height=5.5}
+p <- ggplot(car_data ,aes_string(x = "displacement", 
+                                 y = "weight", 
+                                 color = "cylinders")) +
+  geom_point() +
+  geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE) + 
+  theme(legend.position = "right") +  
+  labs(color = "Cylinders") 
+      
+p2 <- ggMarginal(p, type = "densigram")
+print(p2)
+```
+```{r, message=FALSE, warning=FALSE, echo=FALSE, fig.width=8.27, fig.height=5.5}
+p <- ggplot(car_data ,aes_string(x = "horsepower", 
+                                 y = "weight", 
+                                 color = "cylinders")) +
+  geom_point() +
+  geom_smooth(method=lm , color="red", fill="#69b3a2", se=TRUE) + 
+  theme(legend.position = "right") +  
+  labs(color = "Cylinders") 
+      
+p2 <- ggMarginal(p, type = "densigram")
+print(p2)
+```
+
+The red line in the scatter plot represents the fitting of a linear model to the data. The width of the red area surrounding the red line indicates the variance in the data for that particular point. A wider red area suggests higher variability in the data at that point.
+
+
+Based on the analysis of the previous plots, it can be concluded that the number of cylinders has a positive impact on the numerical variables. Additionally, the strong correlations observed in the last six plots further support this conclusion.
+
+## Question 2
+Another research question to explore is whether there are any differences in the numerical variables among the origins of the cars. To investigate this, a violin plot was created.
+
+```{r, fig.width=8.27, fig.height=11.69}
+par(mfrow = c(3,2))
 for (i in num_var) {
   p <- vioplot(car_data[,i] ~ car_data$origin,
                col = brewer.pal(3, "Paired"),
@@ -178,32 +266,47 @@ for (i in num_var) {
   p
 }
 ```
+The violin plots above illustrate that cars in America tend to have higher fuel consumption, larger engines, more horsepower, and greater weight compared to those in Europe and Japan. However, they have similar acceleration characteristics. It's important to note that the dataset contains a higher proportion of cars from the USA, resulting in a larger variance for each numerical variable. This observation is also evident in the violin plots, where the plots for the USA have longer tails compared to the other two regions.
 
-Laslty, lets's check whether the origin of the car, or the amount of cylinders cluster together. To analyse this, a principle component analysis was performed. 
+Considering our previous findings, it's plausible that there are more 8-cylinder cars in the USA. Let's explore this hypothesis further with a stacked barplot.
+
+```{r, warning=FALSE}
+barplot(table(car_data[,c("origin", "cylinders")]),
+        main = "Barplot of the frequency of region per amount of cylinders",
+        xlab = "Amount of cylinders",
+        ylim = c(0,200), 
+        ylab = "Frequency",
+        col = brewer.pal(3, "Paired"))
+legend("topright", legend = rownames(table(car_data$origin)), fill = brewer.pal(3, "Paired"))
+```
+As depicted above, all 8-cylinder and almost all 6-cylinder cars originate from America, indicating heavier and more fuel-consuming engines.
+
+## Conclusion via PCA
+Lastly, let's investigate whether there is clustering based on the origin of the car or/and  based on the number of cylinders, confirming the findings from research questions 1 and 2. To conduct this analysis, a principal component analysis (PCA) was performed.
 ```{r}
-car_data_copy <- car_data
-car_data_copy <- na.omit(car_data_copy)
-pca_result <- prcomp(na.omit(car_data_copy[num_var]), scale. = TRUE, center = TRUE)
+pca_result <- prcomp(na.omit(car_data[num_var]), scale. = TRUE, center = TRUE)
 pca_df <- as.data.frame(pca_result$x)
-pca_df <- cbind(pca_df, origin = car_data_copy$origin)
+pca_df <- cbind(pca_df, origin = car_data$origin)
 
 # Create the PCA plot with origin coloring
 ggplot(pca_df, aes(x = PC1, y = PC2, color = origin)) +
   geom_point(size = 3) +
-  labs(title = "PCA Plot of Numerical variables",
+  labs(title = "PCA Plot of Numerical variables, colored by origin",
        x = "Principal Component 1",
        y = "Principal Component 2") +
   theme_minimal()
 
-pca_df <- cbind(pca_df, cylinders = car_data_copy$cylinders)
+pca_df <- cbind(pca_df, cylinders = car_data$cylinders)
 # Create the PCA plot with cylinder coloring
 ggplot(pca_df, aes(x = PC1, y = PC2, color = cylinders)) +
   geom_point(size = 3) +
-  labs(title = "PCA Plot of Numerical variables",
+  labs(title = "PCA Plot of Numerical variables, colored by number of cylinders",
        x = "Principal Component 1",
        y = "Principal Component 2") +
   theme_minimal()
 ```
+
+In the PCA plot, two distinct clusters are noticeable—one on the left and one on the right. Upon examining the plot where the number of cylinders is color-coded, a clear separation can be observed on the left side, corresponding to the 8-cylinder category, which is distinct from the rest of the dataset. It's noteworthy that all data points in this cluster belong to the USA region, as evident from the very first PCA plot. Overall, it appears that the number of cylinders serves as a clearer clustering factor compared to the region from which the car originated.
 
 
 
