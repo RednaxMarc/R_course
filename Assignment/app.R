@@ -18,9 +18,9 @@ ui <- fluidPage(
     sidebarPanel(
       width = 2,
       h3("Navigation"),
-      actionLink("intro", "Introduction"),
+      actionLink("intro", "1. Introduction"),
       br(),
-      actionLink("explore", "Explore Data")
+      actionLink("explore", "2. Explore Data")
     ), 
     
     # Main content area, which will update based on selected link
@@ -35,20 +35,20 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   # Create a reactive value to keep track of the selected section
-  selected_tab <- reactiveVal("intro") # Default to "intro" on load
+  rv <- reactiveValues(selected_tab = "intro") # Default to "intro" on load
   
   # Update the reactive value based on which link is clicked
   observeEvent(input$intro, {
-    selected_tab("intro")
+    rv$selected_tab <- "intro"
   })
   
   observeEvent(input$explore, {
-    selected_tab("explore")
+    rv$selected_tab <- "explore"
   })
   
   # Render content based on the current value of selected_tab
   output$content <- renderUI({
-    if (selected_tab() == "intro") {
+    if (rv$selected_tab == "intro") {
       tagList(
         h1("Introduction of the Data"),
         p("The dataset contains 399 rows of 9 features, which provide general properties of various cars. These 9 features are the following:"),
@@ -70,7 +70,7 @@ server <- function(input, output, session) {
         p("The dataset can be found via this ",
           a("link", href = "https://www.kaggle.com/datasets/tawfikelmetwally/automobile-dataset", target = "_blank"))
       )
-    } else if (selected_tab() == "explore") {
+    } else if (rv$selected_tab == "explore") {
       tagList(
         h1("Explore Data"),
         selectInput("plot_type", "Choose a plot type:",
